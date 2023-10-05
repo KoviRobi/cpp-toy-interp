@@ -18,6 +18,13 @@ add_executable(tiny-interp
   src/readline.cpp
 )
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(READLINE REQUIRED readline)
+
+target_link_libraries(tiny-interp ${READLINE_LIBRARIES})
+target_include_directories(tiny-interp PUBLIC ${READLINE_INCLUDE_DIRS})
+target_compile_options(tiny-interp PUBLIC ${READLINE_CFLAGS_OTHER})
+
 find_package(Catch2 3 REQUIRED)
 
 add_executable(test_parser

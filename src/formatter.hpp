@@ -12,6 +12,7 @@ struct FmtVisitor : Visitor {
 
   const std::string &operator*(void) const;
   void insert_semicolon(void);
+  void clear(void);
 
 private:
   std::string str = "";

@@ -42,3 +42,5 @@ void FmtVisitor::visitIdentifier(const Identifier &id) { str += *id; };
 const std::string &FmtVisitor::operator*(void) const { return str; }
 
 void FmtVisitor::insert_semicolon(void) { str += " ; "; }
+
+void FmtVisitor::clear(void) { str = ""; }

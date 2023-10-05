@@ -35,6 +35,8 @@
           nativeBuildInputs = [
             cmake
             ninja
+            readline
+            pkg-config
             catch2_3
           ];
           passthru.devTools = [

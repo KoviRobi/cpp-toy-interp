@@ -11,5 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(tiny-interp
   src/tokeniser.cpp
+  src/ast.cpp
+  src/parser.cpp
   src/main.cpp
 )

@@ -35,6 +35,7 @@
           nativeBuildInputs = [
             cmake
             ninja
+            catch2_3
           ];
           passthru.devTools = [
             ccls

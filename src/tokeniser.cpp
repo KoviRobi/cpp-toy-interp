@@ -2,9 +2,20 @@
 
 #include <iostream>
 
-std::string::const_iterator Tokeniser::getpos() const { return this->pos; }
-void Tokeniser::setpos(std::string::const_iterator newpos) {
-  this->pos = newpos;
+Tokeniser::Tokeniser(const std::string &str)
+    : str(str), pos(str.cbegin()), eof(false) {}
+
+pos_t Tokeniser::get_pos(void) const {
+  return std::make_pair(this->pos, this->eof);
+}
+void Tokeniser::set_pos(pos_t newpos) {
+  this->pos = newpos.first;
+  this->eof = newpos.second;
+}
+
+void Tokeniser::print_cursor(void) const {
+  std::cout << std::string_view(this->str.cbegin(), this->pos) << "|"
+            << std::string_view(this->pos, this->str.cend()) << std::endl;
 }
 
 const std::string_view Tokeniser::next_token() {

@@ -1,32 +1,95 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
+#include <vector>
 
 struct Ast;
 struct Assignment;
 struct Expression;
-struct NumExpr;
+struct Identifier;
+struct Fn;
+struct App;
+struct Binop;
+struct Number;
 
 struct Visitor {
-  virtual void visitAssignment(Assignment &) = 0;
-  virtual void visitNumExpr(NumExpr &) = 0;
+  virtual void visitAssignment(const Assignment &) = 0;
+  virtual void visitFn(const Fn &) = 0;
+  virtual void visitApp(const App &) = 0;
+  virtual void visitBinop(const Binop &) = 0;
+  virtual void visitNumber(const Number &) = 0;
+  virtual void visitIdentifier(const Identifier &) = 0;
 };
 
 struct Ast {
-  virtual void accept(Visitor &) = 0;
+  virtual void accept(Visitor &) const = 0;
   virtual ~Ast() = default;
 };
 
 struct Assignment : Ast {
-  void accept(Visitor &) override;
+  Assignment(std::unique_ptr<Identifier> name,
+             std::unique_ptr<Expression> body);
+  void accept(Visitor &) const override;
+  const Identifier &get_name(void) const;
+  const Expression &get_body(void) const;
+
+private:
+  const std::unique_ptr<Identifier> name;
+  const std::unique_ptr<Expression> body;
 };
 
 struct Expression : Ast {};
 
-struct NumExpr : Expression {
-  NumExpr(uint32_t value);
-  void accept(Visitor &) override;
-  uint32_t get() const;
+struct Identifier : Expression {
+  Identifier(std::string name);
+  void accept(Visitor &) const override;
+  const std::string &operator*() const;
+
+private:
+  const std::string name;
+};
+
+struct Fn : Expression {
+  Fn(std::vector<Identifier> args, std::vector<std::unique_ptr<Ast>> body);
+  void accept(Visitor &) const override;
+  const std::vector<Identifier> &get_args(void) const;
+  const std::vector<std::unique_ptr<Ast>> &get_body(void) const;
+
+private:
+  const std::vector<Identifier> args;
+  const std::vector<std::unique_ptr<Ast>> body;
+};
+
+struct App : Expression {
+  App(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
+  void accept(Visitor &) const override;
+  const Expression &get_lhs(void) const;
+  const Expression &get_rhs(void) const;
+
+private:
+  const std::unique_ptr<Expression> lhs;
+  const std::unique_ptr<Expression> rhs;
+};
+
+struct Binop : Expression {
+  Binop(std::string op, std::unique_ptr<Expression> lhs,
+        std::unique_ptr<Expression> rhs);
+  void accept(Visitor &) const override;
+  const std::string &get_op(void) const;
+  const Expression &get_lhs(void) const;
+  const Expression &get_rhs(void) const;
+
+private:
+  const std::string op;
+  const std::unique_ptr<Expression> lhs;
+  const std::unique_ptr<Expression> rhs;
+};
+
+struct Number : Expression {
+  Number(uint32_t value);
+  void accept(Visitor &) const override;
+  uint32_t operator*() const;
 
 private:
   uint32_t value;

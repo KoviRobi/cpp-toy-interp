@@ -2,4 +2,9 @@
 *~
 \#*\#
 
-.direnv
+*.orig
+
+/.direnv
+/build/
+.ccls-cache
+.cache/

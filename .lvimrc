@@ -1,0 +1,42 @@
+function! Cmakels_project_root(buffer)
+  let l:builddir = ale#path#FindNearestDirectory(a:buffer, "build/")
+  return fnamemodify(l:builddir, ":p:h")
+endfunction
+
+call ale#linter#Define('cmake', {
+\   'name': 'cmake-language-server',
+\   'lsp': 'stdio',
+\   'executable': 'cmake-language-server',
+\   'command': '%e',
+\   'project_root': function('Cmakels_project_root'),
+\})
+let g:ale_linters.cmake = [ "cmake-language-server" ]
+
+let g:ale_linters.cpp = [ "ccls" ]
+let g:ale_completion_enabled = 1
+set omnifunc=ale#completion#OmniFunc
+let g:ale_fixers.cpp = [ "clang-format", "remove_trailing_lines", "trim_whitespace" ]
+
+let &efm = "%-G/nix/store%f: %m"
+let &efm .= ", %*[^\"]\"%f\"%*\\D%l: %m"
+let &efm .= ",\"%f\"%*\\D%l: %m"
+let &efm .= ",%-G%f:%l: (Each undeclared identifier is reported only once"
+let &efm .= ",%-G%f:%l: for each function it appears in.)"
+let &efm .= ",%-GIn file included from %f:%l:%c:"
+let &efm .= ",%-GIn file included from %f:%l:%c\\,"
+let &efm .= ",%-GIn file included from %f:%l:%c"
+let &efm .= ",%-GIn file included from %f:%l"
+let &efm .= ",%-G%*[ ]from %f:%l:%c"
+let &efm .= ",%-G%*[ ]from %f:%l:"
+let &efm .= ",%-G%*[ ]from %f:%l\\,"
+let &efm .= ",%-G%*[ ]from %f:%l"
+let &efm .= ",%f:%l:%c:%m"
+let &efm .= ",%f(%l):%m"
+let &efm .= ",%f:%l:%m"
+let &efm .= ",\"%f\"\\, line %l%*\\D%c%*[^ ] %m"
+let &efm .= ",%D%*\\a[%*\\d]: Entering directory %*[`']%f'"
+let &efm .= ",%X%*\\a[%*\\d]: Leaving directory %*[`']%f'"
+let &efm .= ",%D%*\\a: Entering directory %*[`']%f'"
+let &efm .= ",%X%*\\a: Leaving directory %*[`']%f'"
+let &efm .= ",%DMaking %*\\a in %f"
+let &efm .= ",%f|%l| %m"

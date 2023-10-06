@@ -26,6 +26,8 @@ target_link_libraries(tiny-interp ${READLINE_LIBRARIES})
 target_include_directories(tiny-interp PUBLIC ${READLINE_INCLUDE_DIRS})
 target_compile_options(tiny-interp PUBLIC ${READLINE_CFLAGS_OTHER})
 
+install(TARGETS tiny-interp)
+
 find_package(Catch2 3 REQUIRED)
 
 add_executable(test_parser

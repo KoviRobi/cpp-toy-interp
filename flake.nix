@@ -43,6 +43,7 @@
             ccls
             cmake-language-server
             clang-tools
+            valgrind
           ];
         };
 

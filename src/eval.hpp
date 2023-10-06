@@ -1,5 +1,34 @@
 #pragma once
 
+/** \file
+ * \brief Contains values in the language (numbers and closures) and an
+ * evaluator for evaluating a syntax-tree. Function-bodies live beyond their
+ * AST, consider
+ *
+ *    int main(int argc, char *argv[]) {
+ *      Readline readline;
+ *      std::optional<std::string> line;
+ *
+ *      EvalVisitor evaluator;
+ *      FmtVisitor formatter;
+ *      FmtValue value_formatter(formatter);
+ *
+ *      while ((line = readline.read("> ")).has_value()) {
+ *        auto tree = parse(*line);
+ *        for (auto &node : tree) {
+ *          node->accept(evaluator);
+ *        }
+ *        formatter.clear();
+ *        evaluator.get_last()->accept(value_formatter);
+ *      }
+ *    }
+ *
+ * If you do `let id = fn x { x }` in one line/evaluation, the AST will get
+ * deallocated in the next while loop iteration. But you still want to be able
+ * to run `id 2` in another line/evaluation, so we use shared_ptr for function
+ * bodies.
+ */
+
 #include "ast.hpp"
 
 #include <map>

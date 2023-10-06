@@ -1,5 +1,9 @@
 #pragma once
 
+/** \file
+ * \brief Prints an AST
+ */
+
 #include "ast.hpp"
 
 struct FmtVisitor : Visitor {

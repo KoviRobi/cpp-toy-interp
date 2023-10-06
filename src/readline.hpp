@@ -1,5 +1,9 @@
 #pragma once
 
+/** \file
+ * \brief Wraps readline for line-editing and history capabilities.
+ */
+
 #include <optional>
 #include <string>
 

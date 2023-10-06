@@ -1,5 +1,9 @@
 #pragma once
 
+/** \file
+ * \brief The abstract syntax-tree of the language
+ */
+
 #include <cstdint>
 #include <memory>
 #include <vector>

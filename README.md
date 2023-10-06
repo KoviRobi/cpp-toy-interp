@@ -13,4 +13,12 @@ To run
 
 ```console
 $ ./build/tiny-interp
+> let id = fn x { x }
+fn x { x }
+> let x = 1
+1
+> id x
+1
+> id 2
+2
 ```

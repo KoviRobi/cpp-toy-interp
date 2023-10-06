@@ -1,5 +1,10 @@
 #pragma once
 
+/** \file
+ * \brief An overly simple tokeniser, only space based so you need to use e.g.
+ * `( 1 + 2 )` instead of `(1+2)`
+ */
+
 #include <exception>
 #include <optional>
 #include <string>

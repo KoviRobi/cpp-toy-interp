@@ -10,12 +10,15 @@ const Expression &Assignment::get_body(void) const { return *body; }
 Identifier::Identifier(std::string name) : name(name) {}
 void Identifier::accept(Visitor &v) const { v.visitIdentifier(*this); }
 const std::string &Identifier::operator*() const { return name; }
+bool Identifier::operator<(const Identifier &other) const {
+  return this->name < other.name;
+}
 
-Fn::Fn(std::vector<Identifier> args, std::vector<std::unique_ptr<Ast>> body)
+Fn::Fn(std::vector<Identifier> args, std::vector<std::shared_ptr<Ast>> body)
     : args(std::move(args)), body(std::move(body)) {}
 void Fn::accept(Visitor &v) const { v.visitFn(*this); }
 const std::vector<Identifier> &Fn::get_args(void) const { return args; }
-const std::vector<std::unique_ptr<Ast>> &Fn::get_body(void) const {
+const std::vector<std::shared_ptr<Ast>> &Fn::get_body(void) const {
   return body;
 }
 

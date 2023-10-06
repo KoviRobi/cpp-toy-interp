@@ -7,14 +7,20 @@ void FmtVisitor::visitAssignment(const Assignment &let) {
 
 void FmtVisitor::visitFn(const Fn &fn) {
   str += "fn ";
-  for (auto &arg : fn.get_args())
-    arg.accept(*this);
-  str += " { ";
+
   bool first = true;
+  for (auto &arg : fn.get_args()) {
+    if (!first)
+      str += " , ";
+    first = false;
+    arg.accept(*this);
+  }
+
+  str += " { ";
+  first = true;
   for (auto &body : fn.get_body()) {
-    if (!first) {
+    if (!first)
       insert_semicolon();
-    }
     first = false;
     body->accept(*this);
   }

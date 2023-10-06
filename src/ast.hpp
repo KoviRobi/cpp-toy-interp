@@ -45,20 +45,21 @@ struct Identifier : Expression {
   Identifier(std::string name);
   void accept(Visitor &) const override;
   const std::string &operator*() const;
+  bool operator<(const Identifier &other) const;
 
 private:
   const std::string name;
 };
 
 struct Fn : Expression {
-  Fn(std::vector<Identifier> args, std::vector<std::unique_ptr<Ast>> body);
+  Fn(std::vector<Identifier> args, std::vector<std::shared_ptr<Ast>> body);
   void accept(Visitor &) const override;
   const std::vector<Identifier> &get_args(void) const;
-  const std::vector<std::unique_ptr<Ast>> &get_body(void) const;
+  const std::vector<std::shared_ptr<Ast>> &get_body(void) const;
 
 private:
   const std::vector<Identifier> args;
-  const std::vector<std::unique_ptr<Ast>> body;
+  const std::vector<std::shared_ptr<Ast>> body;
 };
 
 struct App : Expression {

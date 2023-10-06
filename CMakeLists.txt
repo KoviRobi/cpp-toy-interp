@@ -16,6 +16,7 @@ add_executable(tiny-interp
   src/formatter.cpp
   src/main.cpp
   src/readline.cpp
+  src/eval.cpp
 )
 
 find_package(PkgConfig REQUIRED)

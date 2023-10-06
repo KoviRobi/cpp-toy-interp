@@ -53,7 +53,7 @@ struct Parser {
   std::vector<Identifier> vars(void);
   std::unique_ptr<Expression> expr(void);
   std::unique_ptr<Ast> statement(void);
-  std::vector<std::unique_ptr<Ast>> statements(void);
+  template <typename T> std::vector<T> statements(void);
 
 private:
   std::unique_ptr<Tokeniser> tokr;
@@ -162,9 +162,10 @@ std::unique_ptr<Expression> Parser::expr(void) {
   if (tok == "fn") {
     auto args = vars();
     expect("{");
-    auto body = statements();
+    // The body is going to be kept around for longer for e.g. closures
+    auto body = statements<std::shared_ptr<Ast>>();
     expect("}");
-    return std::make_unique<Fn>(std::move(args), std::move(body));
+    return std::make_unique<Fn>(std::move(args), body);
   }
 
   tokr->set_pos(pos);
@@ -189,8 +190,8 @@ std::unique_ptr<Ast> Parser::statement(void) {
   return expr();
 }
 
-std::vector<std::unique_ptr<Ast>> Parser::statements(void) {
-  std::vector<std::unique_ptr<Ast>> ret;
+template <typename T> std::vector<T> Parser::statements(void) {
+  std::vector<T> ret;
   ret.push_back(statement());
   auto pos = tokr->get_pos();
   std::string_view tok;
@@ -212,5 +213,5 @@ std::vector<std::unique_ptr<Ast>> Parser::statements(void) {
 
 std::vector<std::unique_ptr<Ast>> parse(const std::string &str) {
   auto parser = Parser(str);
-  return parser.statements();
+  return parser.statements<std::unique_ptr<Ast>>();
 }

@@ -34,11 +34,21 @@
 #include <map>
 #include <vector>
 
-struct EvalError : std::exception {};
+struct EvalError : std::exception {
+  const char *what(void) const noexcept override;
+};
 
-struct NotANumber : EvalError {};
-struct NotAFunction : EvalError {};
-struct UnknownVariable : EvalError {};
+struct NotANumber : EvalError {
+  const char *what(void) const noexcept override;
+};
+
+struct NotAFunction : EvalError {
+  const char *what(void) const noexcept override;
+};
+
+struct UnknownVariable : EvalError {
+  const char *what(void) const noexcept override;
+};
 
 struct ValueVisitor;
 struct EvalVisitor;

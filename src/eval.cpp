@@ -2,6 +2,22 @@
 
 #include <cassert>
 
+const char *EvalError::what(void) const noexcept {
+  return "Unknown error during evaluation";
+}
+
+const char *NotANumber::what(void) const noexcept {
+  return "Value is not a number";
+}
+
+const char *NotAFunction::what(void) const noexcept {
+  return "Value is not a function";
+}
+
+const char *UnknownVariable::what(void) const noexcept {
+  return "Unknown variable";
+}
+
 NumberValue::NumberValue(uint32_t value) : value(value) {}
 void NumberValue::accept(ValueVisitor &v) const { v.visitNumber(*this); }
 uint32_t NumberValue::get_value() const { return value; }

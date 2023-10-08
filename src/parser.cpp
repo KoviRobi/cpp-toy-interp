@@ -8,14 +8,18 @@
 
 struct Parser {
   struct BadToken : public ParseError {
-    BadToken(const std::string str) : str(str) {}
+    BadToken(const std::string str) : str("Unexpected token: " + str) {}
+
+    const char *what(void) const noexcept override { return str.c_str(); }
 
   private:
     std::string str;
   };
 
   struct LeftoverString : public ParseError {
-    LeftoverString(const std::string str) : str(str) {}
+    LeftoverString(const std::string str) : str("Unable to parse: " + str) {}
+
+    const char *what(void) const noexcept override { return str.c_str(); }
 
   private:
     std::string str;

@@ -102,14 +102,26 @@ bool Parser::is_binop(std::string_view tok) {
   return tok == "<" || tok == "==" || tok == ">" || tok == "+" || tok == "-";
 }
 
-std::unique_ptr<Expression> Parser::infix(void) {
+std::unique_ptr<Expression> Parser::app(void) {
   auto ast = term();
+  auto pos = tokr->get_pos();
+  try {
+    auto rhs = app();
+    ast = std::make_unique<App>(std::move(ast), std::move(rhs));
+  } catch (const ParseError &e) {
+    tokr->set_pos(pos);
+  }
+  return ast;
+}
+
+std::unique_ptr<Expression> Parser::infix(void) {
+  auto ast = app();
   auto pos = tokr->get_pos();
   std::string_view tok;
   try {
     tok = tokr->next_token();
     while (is_binop(tok)) {
-      auto rhs = term();
+      auto rhs = app();
       ast = std::make_unique<Binop>(std::string(tok), std::move(ast),
                                     std::move(rhs));
       pos = tokr->get_pos();
@@ -120,18 +132,6 @@ std::unique_ptr<Expression> Parser::infix(void) {
   // Deliberately after the catch -- we want to set it back if the loop
   // terminates
   tokr->set_pos(pos);
-  return ast;
-}
-
-std::unique_ptr<Expression> Parser::app(void) {
-  auto ast = infix();
-  auto pos = tokr->get_pos();
-  try {
-    auto rhs = app();
-    ast = std::make_unique<App>(std::move(ast), std::move(rhs));
-  } catch (const ParseError &e) {
-    tokr->set_pos(pos);
-  }
   return ast;
 }
 
@@ -198,7 +198,7 @@ std::unique_ptr<Expression> Parser::expr(void) {
   }
 
   tokr->set_pos(pos);
-  return app();
+  return infix();
 }
 
 std::unique_ptr<Ast> Parser::statement(void) {

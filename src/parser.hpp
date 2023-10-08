@@ -15,13 +15,13 @@
  *
  *     expr -> "fn" vars expr.
  *     expr -> "if" expr "then" expr "else" expr.
- *     expr -> app.
+ *     expr -> infix.
  *
- *     app -> infix app?.
- *
- *     infix -> term (binop term)*.
+ *     infix -> app (binop app)*.
  *
  *     binop -> "<" | "==" | ">" | "+" | "-".
+ *
+ *     app -> infix app?.
  *
  *     term -> "(" expr ")"
  *     term -> "{" statements "}"

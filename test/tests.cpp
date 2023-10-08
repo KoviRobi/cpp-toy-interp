@@ -97,6 +97,13 @@ TEST_CASE("Test parsing", "[parse]") {
       formatted += " ; ";
     }
     REQUIRE("( fn x 1 ) ( 2 ) ; " == formatted);
+
+    formatted = "";
+    for (auto &node : parse("f 1 + g 2")) {
+      node->accept(ast_formatter);
+      formatted += " ; ";
+    }
+    REQUIRE("( ( f ) ( 1 ) ) + ( ( g ) ( 2 ) ) ; " == formatted);
   }
 
   SECTION("Statements") {

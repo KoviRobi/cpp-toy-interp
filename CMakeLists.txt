@@ -9,15 +9,17 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(tiny-interp
+add_library(tiny-interp-lib STATIC
   src/tokeniser.cpp
   src/ast.cpp
   src/parser.cpp
   src/formatter.cpp
-  src/main.cpp
   src/readline.cpp
-  src/eval.cpp
-)
+  src/eval.cpp)
+target_include_directories(tiny-interp-lib PUBLIC src)
+
+add_executable(tiny-interp src/main.cpp)
+target_link_libraries(tiny-interp tiny-interp-lib)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(READLINE REQUIRED readline)
@@ -30,13 +32,8 @@ install(TARGETS tiny-interp)
 
 find_package(Catch2 3 REQUIRED)
 
-add_executable(test_parser
-  test/test_parser.cpp
-  src/tokeniser.cpp
-  src/ast.cpp
-  src/eval.cpp
-  src/parser.cpp
-  src/formatter.cpp
+add_executable(tests
+  test/tests.cpp
 )
-target_include_directories(test_parser PRIVATE ./src)
-target_link_libraries(test_parser PRIVATE Catch2::Catch2WithMain)
+target_include_directories(tests PRIVATE ./src)
+target_link_libraries(tests PUBLIC tiny-interp-lib PRIVATE Catch2::Catch2WithMain)

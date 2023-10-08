@@ -85,3 +85,28 @@ TEST_CASE("Test parsing", "[parse]") {
     REQUIRE("let y = 1 ; fn x { let y = 2 ; y } ; " == formatted);
   }
 }
+
+TEST_CASE("Test evaluating", "[eval]") {
+  std::string formatted;
+  EvalVisitor evaluator;
+  FmtAst ast_formatter([&](auto s) { formatted += s; });
+  FmtValue value_formatter(ast_formatter, [&](auto s) { formatted += s; });
+
+  SECTION("Arithmetic") {
+    formatted = "";
+    for (auto &node : parse("1 + 2")) {
+      node->accept(evaluator);
+    }
+    evaluator.get_last()->accept(value_formatter);
+    REQUIRE("3" == formatted);
+  }
+
+  SECTION("Variables") {
+    formatted = "";
+    for (auto &node : parse("let x = 4 ; x")) {
+      node->accept(evaluator);
+    }
+    evaluator.get_last()->accept(value_formatter);
+    REQUIRE("4" == formatted);
+  }
+}

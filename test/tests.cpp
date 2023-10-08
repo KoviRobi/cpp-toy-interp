@@ -180,4 +180,25 @@ TEST_CASE("Test evaluating", "[eval]") {
     evaluator.get_last()->accept(value_formatter);
     REQUIRE("2" == formatted);
   }
+
+  SECTION("Complicated functions") {
+    formatted = "";
+    evaluator.set_environment({});
+    for (auto &line : {
+             "let Y = fn f {"
+             "  ( fn x { f ( fn a { ( x x ) a } ) } )"
+             "  ( fn x { f ( fn a { ( x x ) a } ) } )"
+             " }",
+             "let sum_n = Y ( fn sum_n { fn n {"
+             "  if n == 0 then 0 else n + sum_n ( n - 1 ) "
+             " } } )",
+             "sum_n 10",
+         }) {
+      for (auto &node : parse(line)) {
+        node->accept(evaluator);
+      }
+    }
+    evaluator.get_last()->accept(value_formatter);
+    REQUIRE("55" == formatted);
+  }
 }

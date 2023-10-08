@@ -1,52 +1,76 @@
 #include "formatter.hpp"
 
-void FmtVisitor::visitAssignment(const Assignment &let) {
-  str += "let " + *let.get_name() + " = ";
+#include <iostream>
+
+void formatFn(const std::vector<Identifier> &args,
+              const std::vector<std::shared_ptr<Ast>> &body,
+              std::function<void(const std::string &)> output,
+              FmtAst &visitor) {
+  output("fn ");
+
+  bool first = true;
+  for (auto &arg : args) {
+    if (!first)
+      output(" , ");
+    first = false;
+    arg.accept(visitor);
+  }
+
+  output(" { ");
+  first = true;
+  for (auto &body : body) {
+    if (!first)
+      output(" ; ");
+    first = false;
+    body->accept(visitor);
+  }
+  output(" }");
+}
+
+// AST formatter
+
+FmtAst::FmtAst(std::function<void(const std::string &)> output)
+    : output(output) {}
+
+void FmtAst::visitAssignment(const Assignment &let) {
+  output("let ");
+  output(*let.get_name());
+  output(" = ");
   let.get_body().accept(*this);
 }
 
-void FmtVisitor::visitFn(const Fn &fn) {
-  str += "fn ";
-
-  bool first = true;
-  for (auto &arg : fn.get_args()) {
-    if (!first)
-      str += " , ";
-    first = false;
-    arg.accept(*this);
-  }
-
-  str += " { ";
-  first = true;
-  for (auto &body : fn.get_body()) {
-    if (!first)
-      insert_semicolon();
-    first = false;
-    body->accept(*this);
-  }
-  str += " }";
+void FmtAst::visitFn(const Fn &fn) {
+  formatFn(fn.get_args(), fn.get_body(), output, *this);
 };
 
-void FmtVisitor::visitApp(const App &app) {
+void FmtAst::visitApp(const App &app) {
   app.get_lhs().accept(*this);
-  str += " ";
+  output(" ");
   app.get_rhs().accept(*this);
 };
 
-void FmtVisitor::visitBinop(const Binop &op) {
-  str += "( ";
+void FmtAst::visitBinop(const Binop &op) {
+  output("( ");
   op.get_lhs().accept(*this);
-  str += " ) " + op.get_op() + " ( ";
+  output(" ) " + op.get_op() + " ( ");
   op.get_rhs().accept(*this);
-  str += " )";
+  output(" )");
 };
 
-void FmtVisitor::visitNumber(const Number &n) { str += std::to_string(*n); }
+void FmtAst::visitNumber(const Number &n) { output(std::to_string(*n)); }
 
-void FmtVisitor::visitIdentifier(const Identifier &id) { str += *id; };
+void FmtAst::visitIdentifier(const Identifier &id) { output(*id); };
 
-const std::string &FmtVisitor::operator*(void) const { return str; }
+// Value formatter
 
-void FmtVisitor::insert_semicolon(void) { str += " ; "; }
+FmtValue::FmtValue(FmtAst &ast_visitor,
+                   std::function<void(const std::string &)> output)
+    : ast_visitor(ast_visitor), output(output) {}
 
-void FmtVisitor::clear(void) { str = ""; }
+void FmtValue::visitNumber(const NumberValue &n) {
+  output(std::to_string(n.get_value()));
+}
+
+void FmtValue::visitClosure(const ClosureValue &c) {
+  formatFn(c.get_args(), c.get_body(), output, ast_visitor);
+}

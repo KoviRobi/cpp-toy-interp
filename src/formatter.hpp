@@ -5,8 +5,13 @@
  */
 
 #include "ast.hpp"
+#include "eval.hpp"
 
-struct FmtVisitor : Visitor {
+#include <functional>
+
+struct FmtAst : Visitor {
+  FmtAst(std::function<void(const std::string &)> output);
+
   void visitAssignment(const Assignment &let);
   void visitFn(const Fn &fn);
   void visitApp(const App &app);
@@ -14,10 +19,18 @@ struct FmtVisitor : Visitor {
   void visitNumber(const Number &n);
   void visitIdentifier(const Identifier &id);
 
-  const std::string &operator*(void) const;
-  void insert_semicolon(void);
-  void clear(void);
+private:
+  std::function<void(const std::string &)> output;
+};
+
+struct FmtValue : ValueVisitor {
+  FmtValue(FmtAst &ast_visitor,
+           std::function<void(const std::string &)> output);
+
+  void visitNumber(const NumberValue &n) override;
+  void visitClosure(const ClosureValue &c) override;
 
 private:
-  std::string str = "";
+  FmtAst &ast_visitor;
+  std::function<void(const std::string &)> output;
 };

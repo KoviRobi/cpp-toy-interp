@@ -34,6 +34,7 @@ add_executable(test_parser
   test/test_parser.cpp
   src/tokeniser.cpp
   src/ast.cpp
+  src/eval.cpp
   src/parser.cpp
   src/formatter.cpp
 )

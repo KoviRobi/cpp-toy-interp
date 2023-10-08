@@ -8,74 +8,80 @@
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Test parsing", "[parse]") {
-  auto fmt_visitor = FmtVisitor();
+  std::string formatted;
+  FmtAst ast_formatter([&](auto s) { formatted += s; });
 
   SECTION("Empty string") {
-    fmt_visitor.clear();
+    formatted = "";
     for (auto &node : parse("")) {
-      node->accept(fmt_visitor);
-      fmt_visitor.insert_semicolon();
+      node->accept(ast_formatter);
+      formatted += " ; ";
     }
-    REQUIRE("" == *fmt_visitor);
+    REQUIRE("" == formatted);
   }
 
   SECTION("Malformatted string") {
-    fmt_visitor.clear();
+    formatted = "";
     REQUIRE_THROWS_AS(parse("} unparsed"), ParseError);
+    for (auto &node : parse("")) {
+      node->accept(ast_formatter);
+      formatted += " ; ";
+    }
+    REQUIRE("" == formatted);
   }
 
   SECTION("Let-expression") {
-    fmt_visitor.clear();
+    formatted = "";
     for (auto &node : parse("let x = 1")) {
-      node->accept(fmt_visitor);
-      fmt_visitor.insert_semicolon();
+      node->accept(ast_formatter);
+      formatted += " ; ";
     }
-    REQUIRE("let x = 1 ; " == *fmt_visitor);
+    REQUIRE("let x = 1 ; " == formatted);
   }
 
   SECTION("Binary operator") {
-    fmt_visitor.clear();
+    formatted = "";
     for (auto &node : parse("1 + 2")) {
-      node->accept(fmt_visitor);
-      fmt_visitor.insert_semicolon();
+      node->accept(ast_formatter);
+      formatted += " ; ";
     }
-    REQUIRE("( 1 ) + ( 2 ) ; " == *fmt_visitor);
+    REQUIRE("( 1 ) + ( 2 ) ; " == formatted);
   }
 
   SECTION("Parentheses") {
-    fmt_visitor.clear();
+    formatted = "";
     for (auto &node : parse("( 1 + 2 )")) {
-      node->accept(fmt_visitor);
-      fmt_visitor.insert_semicolon();
+      node->accept(ast_formatter);
+      formatted += " ; ";
     }
-    REQUIRE("( 1 ) + ( 2 ) ; " == *fmt_visitor);
+    REQUIRE("( 1 ) + ( 2 ) ; " == formatted);
   }
 
   SECTION("Multiple binary operators") {
-    fmt_visitor.clear();
+    formatted = "";
     for (auto &node : parse("1 - 2 - ( 3 + 4 )")) {
-      node->accept(fmt_visitor);
-      fmt_visitor.insert_semicolon();
+      node->accept(ast_formatter);
+      formatted += " ; ";
     }
 
-    REQUIRE("( ( 1 ) - ( 2 ) ) - ( ( 3 ) + ( 4 ) ) ; " == *fmt_visitor);
+    REQUIRE("( ( 1 ) - ( 2 ) ) - ( ( 3 ) + ( 4 ) ) ; " == formatted);
   }
 
   SECTION("Functions") {
-    fmt_visitor.clear();
+    formatted = "";
     for (auto &node : parse("fn x { 1 }")) {
-      node->accept(fmt_visitor);
-      fmt_visitor.insert_semicolon();
+      node->accept(ast_formatter);
+      formatted += " ; ";
     }
-    REQUIRE("fn x { 1 } ; " == *fmt_visitor);
+    REQUIRE("fn x { 1 } ; " == formatted);
   }
 
   SECTION("Statements") {
-    fmt_visitor.clear();
+    formatted = "";
     for (auto &node : parse("let y = 1 ; fn x { let y = 2 ; y }")) {
-      node->accept(fmt_visitor);
-      fmt_visitor.insert_semicolon();
+      node->accept(ast_formatter);
+      formatted += " ; ";
     }
-    REQUIRE("let y = 1 ; fn x { let y = 2 ; y } ; " == *fmt_visitor);
+    REQUIRE("let y = 1 ; fn x { let y = 2 ; y } ; " == formatted);
   }
 }

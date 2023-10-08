@@ -8,56 +8,24 @@
 #include <memory>
 #include <optional>
 
-struct FmtValue : ValueVisitor {
-  FmtValue(FmtVisitor &ast_visitor) : ast_visitor(ast_visitor) {}
-
-  void visitNumber(const NumberValue &n) override {
-    std::cout << n.get_value() << std::endl;
-  }
-
-  void visitClosure(const ClosureValue &c) override {
-    std::cout << "fn ";
-    bool first = true;
-    for (auto &arg : c.get_args()) {
-      if (!first)
-        std::cout << " , ";
-      first = false;
-      std::cout << *arg;
-    }
-
-    std::cout << " { ";
-    first = true;
-    for (auto &body : c.get_body()) {
-      if (!first)
-        std::cout << " ; ";
-      first = false;
-      ast_visitor.clear();
-      body->accept(ast_visitor);
-      std::cout << *ast_visitor;
-    }
-    std::cout << " }" << std::endl;
-  }
-
-private:
-  FmtVisitor &ast_visitor;
-};
-
 int main(int argc, char *argv[]) {
   Readline readline;
   std::optional<std::string> line;
 
+  std::string formatted;
   EvalVisitor evaluator;
-  FmtVisitor formatter;
-  FmtValue value_formatter(formatter);
+  FmtAst ast_formatter([&](auto s) { formatted += s; });
+  FmtValue value_formatter(ast_formatter, [&](auto s) { formatted += s; });
 
   while ((line = readline.read("> ")).has_value()) {
     auto tree = parse(*line);
     for (auto &node : tree) {
       node->accept(evaluator);
     }
-    formatter.clear();
+    formatted = "";
     if (evaluator.get_last()) {
       evaluator.get_last()->accept(value_formatter);
+      std::cout << formatted << std::endl;
     }
   }
 }

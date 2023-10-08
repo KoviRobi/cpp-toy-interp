@@ -10,7 +10,8 @@
  *     statement -> "let" id "=" expr.
  *     statement -> expr.
  *
- *     vars -> id ("," id)*.
+ *     vars -> "(" id ("," id)* ")".
+ *     vars -> id
  *
  *     expr -> "fn" vars expr.
  *     expr -> app.

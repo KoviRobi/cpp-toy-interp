@@ -74,6 +74,13 @@ TEST_CASE("Test parsing", "[parse]") {
       formatted += " ; ";
     }
     REQUIRE("fn x 1 ; " == formatted);
+
+    formatted = "";
+    for (auto &node : parse("fn ( x , y ) x")) {
+      node->accept(ast_formatter);
+      formatted += " ; ";
+    }
+    REQUIRE("fn ( x , y ) x ; " == formatted);
   }
 
   SECTION("Application") {

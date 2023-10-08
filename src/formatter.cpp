@@ -8,15 +8,20 @@ void formatFn(const std::vector<Identifier> &args,
               FmtAst &visitor) {
   output("fn ");
 
-  bool first = true;
-  for (auto &arg : args) {
-    if (!first)
-      output(" , ");
-    first = false;
-    arg.accept(visitor);
+  if (args.size() == 1) {
+    args[0].accept(visitor);
+    output(" ");
+  } else {
+    output("( ");
+    bool first = true;
+    for (auto &arg : args) {
+      if (!first)
+        output(" , ");
+      first = false;
+      arg.accept(visitor);
+    }
+    output(" ) ");
   }
-
-  output(" ");
 
   body->accept(visitor);
 }

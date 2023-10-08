@@ -30,6 +30,7 @@ struct Parser {
   static bool is_binop(std::string_view tok);
   std::unique_ptr<Expression> infix(void);
   std::unique_ptr<Expression> app(void);
+  Identifier id(void);
   std::vector<Identifier> vars(void);
   std::unique_ptr<Expression> expr(void);
   std::unique_ptr<Ast> statement(void);
@@ -131,16 +132,44 @@ std::unique_ptr<Expression> Parser::app(void) {
   return ast;
 }
 
+Identifier Parser::id(void) {
+  std::string_view tok = tokr->next_token();
+  if (!is_id(tok))
+    throw BadToken(std::string(tok));
+  return Identifier(std::string(tok));
+}
+
 std::vector<Identifier> Parser::vars(void) {
   std::vector<Identifier> ret;
+  bool parenthesised = false;
   auto pos = tokr->get_pos();
   std::string_view tok = tokr->next_token();
-  while (is_id(tok)) {
-    ret.push_back(Identifier(std::string(tok)));
+
+  if (tok == "(") {
+    parenthesised = true;
+  } else {
+    tokr->set_pos(pos);
+  }
+
+  ret.push_back(id());
+
+  try {
     pos = tokr->get_pos();
     tok = tokr->next_token();
+    while (tok == ",") {
+      ret.push_back(id());
+      pos = tokr->get_pos();
+      tok = tokr->next_token();
+    }
+  } catch (const ParseError &e) {
   }
+  // Deliberately after the catch -- we want to set it back if the loop
+  // terminates
   tokr->set_pos(pos);
+
+  if (parenthesised)
+    expect(")");
+
   return ret;
 }
 

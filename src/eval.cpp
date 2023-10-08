@@ -57,6 +57,16 @@ void EvalVisitor::visitFn(const Fn &fn) {
       std::make_shared<ClosureValue>(fn.get_args(), fn.get_body(), environment);
 }
 
+void EvalVisitor::visitIfCond(const IfCond &if_cond) {
+  if_cond.get_condition().accept(*this);
+  auto cond = std::dynamic_pointer_cast<NumberValue>(last);
+  bool is_true = cond == nullptr || cond->get_value();
+  if (is_true)
+    if_cond.get_true_case().accept(*this);
+  else
+    if_cond.get_false_case().accept(*this);
+}
+
 void EvalVisitor::visitApp(const App &app) {
   app.get_lhs().accept(*this);
   auto lhs = std::dynamic_pointer_cast<ClosureValue>(last);
@@ -84,7 +94,7 @@ void EvalVisitor::visitBinop(const Binop &op) {
   if (opname == "<") {
     last = std::make_shared<NumberValue>(lhs->get_value() < rhs->get_value());
   }
-  if (opname == "=") {
+  if (opname == "==") {
     last = std::make_shared<NumberValue>(lhs->get_value() == rhs->get_value());
   }
   if (opname == ">") {

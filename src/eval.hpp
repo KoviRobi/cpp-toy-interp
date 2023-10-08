@@ -82,6 +82,7 @@ struct EvalVisitor : Visitor {
   EvalVisitor(std::map<Identifier, std::shared_ptr<Value>>);
   void visitAssignment(const Assignment &let);
   void visitFn(const Fn &fn);
+  void visitIfCond(const IfCond &if_cond);
   void visitApp(const App &app);
   void visitBinop(const Binop &op);
   void visitNumber(const Number &n);

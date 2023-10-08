@@ -107,6 +107,15 @@ TEST_CASE("Test parsing", "[parse]") {
     }
     REQUIRE("let y = 1 ; fn x { let y = 2 ; y } ; " == formatted);
   }
+
+  SECTION("Conditionals") {
+    formatted = "";
+    for (auto &node : parse("if 0 then 1 else 2")) {
+      node->accept(ast_formatter);
+      formatted += " ; ";
+    }
+    REQUIRE("if ( 0 ) then ( 1 ) else ( 2 ) ; " == formatted);
+  }
 }
 
 TEST_CASE("Test evaluating", "[eval]") {
@@ -139,6 +148,26 @@ TEST_CASE("Test evaluating", "[eval]") {
     formatted = "";
     evaluator.set_environment({});
     for (auto &node : parse("( fn x { x + 1 } ) 1")) {
+      node->accept(evaluator);
+    }
+    evaluator.get_last()->accept(value_formatter);
+    REQUIRE("2" == formatted);
+  }
+
+  SECTION("Conditional true") {
+    formatted = "";
+    evaluator.set_environment({});
+    for (auto &node : parse("if 0 == 0 then 1 else 2")) {
+      node->accept(evaluator);
+    }
+    evaluator.get_last()->accept(value_formatter);
+    REQUIRE("1" == formatted);
+  }
+
+  SECTION("Conditional false") {
+    formatted = "";
+    evaluator.set_environment({});
+    for (auto &node : parse("if 0 == 1 then 1 else 2")) {
       node->accept(evaluator);
     }
     evaluator.get_last()->accept(value_formatter);

@@ -14,6 +14,7 @@
  *     vars -> id
  *
  *     expr -> "fn" vars expr.
+ *     expr -> "if" expr "then" expr "else" expr.
  *     expr -> app.
  *
  *     app -> infix app?.

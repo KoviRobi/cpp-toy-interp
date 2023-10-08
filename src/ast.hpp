@@ -13,6 +13,7 @@ struct Assignment;
 struct Expression;
 struct Identifier;
 struct Fn;
+struct IfCond;
 struct App;
 struct Binop;
 struct Number;
@@ -21,6 +22,7 @@ struct StatementExpr;
 struct Visitor {
   virtual void visitAssignment(const Assignment &) = 0;
   virtual void visitFn(const Fn &) = 0;
+  virtual void visitIfCond(const IfCond &) = 0;
   virtual void visitApp(const App &) = 0;
   virtual void visitBinop(const Binop &) = 0;
   virtual void visitNumber(const Number &) = 0;
@@ -66,6 +68,21 @@ struct Fn : Expression {
 private:
   const std::vector<Identifier> args;
   const std::shared_ptr<Ast> body;
+};
+
+struct IfCond : Expression {
+  IfCond(std::unique_ptr<Expression> condition,
+         std::unique_ptr<Expression> true_case,
+         std::unique_ptr<Expression> false_case);
+  void accept(Visitor &) const override;
+  const Expression &get_condition(void) const;
+  const Expression &get_true_case(void) const;
+  const Expression &get_false_case(void) const;
+
+private:
+  const std::unique_ptr<Expression> condition;
+  const std::unique_ptr<Expression> true_case;
+  const std::unique_ptr<Expression> false_case;
 };
 
 struct App : Expression {

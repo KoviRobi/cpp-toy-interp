@@ -42,6 +42,16 @@ void FmtAst::visitFn(const Fn &fn) {
   formatFn(fn.get_args(), fn.get_body(), output, *this);
 };
 
+void FmtAst::visitIfCond(const IfCond &if_cond) {
+  output("if ( ");
+  if_cond.get_condition().accept(*this);
+  output(" ) then ( ");
+  if_cond.get_true_case().accept(*this);
+  output(" ) else ( ");
+  if_cond.get_false_case().accept(*this);
+  output(" )");
+};
+
 void FmtAst::visitApp(const App &app) {
   output("( ");
   app.get_lhs().accept(*this);

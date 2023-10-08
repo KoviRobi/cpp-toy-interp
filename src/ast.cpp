@@ -20,6 +20,16 @@ void Fn::accept(Visitor &v) const { v.visitFn(*this); }
 const std::vector<Identifier> &Fn::get_args(void) const { return args; }
 const std::shared_ptr<Ast> &Fn::get_body(void) const { return body; }
 
+IfCond::IfCond(std::unique_ptr<Expression> condition,
+               std::unique_ptr<Expression> true_case,
+               std::unique_ptr<Expression> false_case)
+    : condition(std::move(condition)), true_case(std::move(true_case)),
+      false_case(std::move(false_case)) {}
+void IfCond::accept(Visitor &v) const { v.visitIfCond(*this); }
+const Expression &IfCond::get_condition() const { return *condition; }
+const Expression &IfCond::get_true_case() const { return *true_case; }
+const Expression &IfCond::get_false_case() const { return *false_case; }
+
 App::App(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
     : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 void App::accept(Visitor &v) const { v.visitApp(*this); }

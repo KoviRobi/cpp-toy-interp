@@ -2,6 +2,7 @@
 #include "tokeniser.hpp"
 
 #include <algorithm>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -39,11 +40,13 @@ struct Parser {
   void assert_finished(void);
 
 private:
+  std::set<std::string> builtins;
   std::unique_ptr<Tokeniser> tokr;
 };
 
 Parser::Parser(const std::string &str)
-    : tokr(std::make_unique<Tokeniser>(str)) {}
+    : tokr(std::make_unique<Tokeniser>(str)),
+      builtins({"let", "fn", "if", "then", "else"}) {}
 
 bool Parser::is_id_cont(const std::string_view &s) {
   return s.size() == 0 || std::all_of(s.begin(), s.end(), [](unsigned char c) {
@@ -53,7 +56,7 @@ bool Parser::is_id_cont(const std::string_view &s) {
 
 bool Parser::is_id(const std::string_view &s) {
   return s.size() > 0 && (std::isalpha((unsigned char)s[0]) || s == "_") &&
-         is_id_cont(s.substr(1));
+         is_id_cont(s.substr(1)) && !builtins.contains(std::string(s));
 }
 
 bool Parser::is_num(const std::string_view &s) {
@@ -182,6 +185,16 @@ std::unique_ptr<Expression> Parser::expr(void) {
     // The body is going to be kept around for longer for e.g. closures
     auto body = expr();
     return std::make_unique<Fn>(std::move(args), std::move(body));
+  }
+
+  if (tok == "if") {
+    auto condition = expr();
+    expect("then");
+    auto true_case = expr();
+    expect("else");
+    auto false_case = expr();
+    return std::make_unique<IfCond>(std::move(condition), std::move(true_case),
+                                    std::move(false_case));
   }
 
   tokr->set_pos(pos);

@@ -41,3 +41,9 @@ const std::string_view Tokeniser::next_token() {
   this->pos = cursor;
   return tok;
 }
+
+const std::string_view Tokeniser::rest() {
+  return std::string_view(this->pos, this->str.cend());
+}
+
+bool Tokeniser::is_finished(void) { return eof; }

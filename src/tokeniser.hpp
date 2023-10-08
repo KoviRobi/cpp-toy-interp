@@ -25,6 +25,10 @@ struct Tokeniser {
 
   const std::string_view next_token();
 
+  const std::string_view rest();
+
+  bool is_finished(void);
+
 private:
   const std::string &str;
   std::string::const_iterator pos;

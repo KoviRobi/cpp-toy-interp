@@ -9,7 +9,12 @@ struct Parser {
   struct BadToken : public ParseError {
     BadToken(const std::string str) : str(str) {}
 
-    const char *what() const noexcept override { return str.c_str(); }
+  private:
+    std::string str;
+  };
+
+  struct LeftoverString : public ParseError {
+    LeftoverString(const std::string str) : str(str) {}
 
   private:
     std::string str;
@@ -30,6 +35,8 @@ struct Parser {
   std::unique_ptr<Ast> statement(void);
   template <typename T> std::vector<T> statements(void);
 
+  void assert_finished(void);
+
 private:
   std::unique_ptr<Tokeniser> tokr;
 };
@@ -49,8 +56,9 @@ bool Parser::is_id(const std::string_view &s) {
 }
 
 bool Parser::is_num(const std::string_view &s) {
-  return std::all_of(s.begin(), s.end(),
-                     [](unsigned char c) { return std::isdigit(c); });
+  return s.size() > 0 && std::all_of(s.begin(), s.end(), [](unsigned char c) {
+           return std::isdigit(c);
+         });
 }
 
 void Parser::expect(std::string s) {
@@ -167,10 +175,11 @@ std::unique_ptr<Ast> Parser::statement(void) {
 
 template <typename T> std::vector<T> Parser::statements(void) {
   std::vector<T> ret;
-  ret.push_back(statement());
   auto pos = tokr->get_pos();
-  std::string_view tok;
   try {
+    std::string_view tok;
+    ret.push_back(statement());
+    pos = tokr->get_pos();
     tok = tokr->next_token();
     while (tok == ";") {
       ret.push_back(statement());
@@ -186,7 +195,17 @@ template <typename T> std::vector<T> Parser::statements(void) {
   return ret;
 }
 
+void Parser::assert_finished(void) {
+  if (tokr->is_finished())
+    return;
+  if (tokr->rest() == "")
+    return;
+  throw LeftoverString(std::string(tokr->rest()));
+}
+
 std::vector<std::unique_ptr<Ast>> parse(const std::string &str) {
   auto parser = Parser(str);
-  return parser.statements<std::unique_ptr<Ast>>();
+  auto ast = parser.statements<std::unique_ptr<Ast>>();
+  parser.assert_finished();
+  return ast;
 }

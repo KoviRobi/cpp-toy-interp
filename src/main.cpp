@@ -56,6 +56,8 @@ int main(int argc, char *argv[]) {
       node->accept(evaluator);
     }
     formatter.clear();
-    evaluator.get_last()->accept(value_formatter);
+    if (evaluator.get_last()) {
+      evaluator.get_last()->accept(value_formatter);
+    }
   }
 }

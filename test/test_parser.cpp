@@ -1,5 +1,6 @@
 #include "formatter.hpp"
 #include "parser.hpp"
+#include "tokeniser.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -8,6 +9,20 @@
 
 TEST_CASE("Test parsing", "[parse]") {
   auto fmt_visitor = FmtVisitor();
+
+  SECTION("Empty string") {
+    fmt_visitor.clear();
+    for (auto &node : parse("")) {
+      node->accept(fmt_visitor);
+      fmt_visitor.insert_semicolon();
+    }
+    REQUIRE("" == *fmt_visitor);
+  }
+
+  SECTION("Malformatted string") {
+    fmt_visitor.clear();
+    REQUIRE_THROWS_AS(parse("} unparsed"), ParseError);
+  }
 
   SECTION("Let-expression") {
     fmt_visitor.clear();

@@ -69,11 +69,27 @@ TEST_CASE("Test parsing", "[parse]") {
 
   SECTION("Functions") {
     formatted = "";
-    for (auto &node : parse("fn x { 1 }")) {
+    for (auto &node : parse("fn x 1")) {
       node->accept(ast_formatter);
       formatted += " ; ";
     }
-    REQUIRE("fn x { 1 } ; " == formatted);
+    REQUIRE("fn x 1 ; " == formatted);
+  }
+
+  SECTION("Application") {
+    formatted = "";
+    for (auto &node : parse("fn x 1 2")) {
+      node->accept(ast_formatter);
+      formatted += " ; ";
+    }
+    REQUIRE("fn x ( 1 ) ( 2 ) ; " == formatted);
+
+    formatted = "";
+    for (auto &node : parse("( fn x 1 ) 2")) {
+      node->accept(ast_formatter);
+      formatted += " ; ";
+    }
+    REQUIRE("( fn x 1 ) ( 2 ) ; " == formatted);
   }
 
   SECTION("Statements") {

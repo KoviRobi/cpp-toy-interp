@@ -7,8 +7,7 @@ void NumberValue::accept(ValueVisitor &v) const { v.visitNumber(*this); }
 uint32_t NumberValue::get_value() const { return value; }
 
 ClosureValue::ClosureValue(
-    const std::vector<Identifier> &args,
-    const std::vector<std::shared_ptr<Ast>> &body,
+    const std::vector<Identifier> &args, const std::shared_ptr<Ast> &body,
     const std::map<Identifier, std::shared_ptr<Value>> environment)
     : environment(environment), args(args), body(body) {}
 
@@ -16,9 +15,7 @@ void ClosureValue::accept(ValueVisitor &v) const { v.visitClosure(*this); }
 
 const std::vector<Identifier> &ClosureValue::get_args() const { return args; }
 
-const std::vector<std::shared_ptr<Ast>> &ClosureValue::get_body() const {
-  return body;
-}
+const std::shared_ptr<Ast> &ClosureValue::get_body() const { return body; }
 
 std::shared_ptr<Value> ClosureValue::apply(std::shared_ptr<Value> arg,
                                            EvalVisitor &eval) const {
@@ -32,9 +29,7 @@ std::shared_ptr<Value> ClosureValue::apply(std::shared_ptr<Value> arg,
   if (args.size() == 1) {
     auto outer_environment = eval.get_environment();
     eval.set_environment(inner_environment);
-    for (auto &node : body) {
-      node->accept(eval);
-    }
+    body->accept(eval);
     auto result = eval.get_last();
     eval.set_environment(outer_environment);
     return result;
@@ -112,6 +107,13 @@ void EvalVisitor::visitIdentifier(const Identifier &id) {
     last = environment[id];
   } else {
     throw UnknownVariable();
+  }
+}
+
+void EvalVisitor::visitStatementExpr(const StatementExpr &statements) {
+  last = nullptr;
+  for (auto &statement : statements.get_body()) {
+    statement->accept(*this);
   }
 }
 

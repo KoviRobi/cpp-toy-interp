@@ -18,6 +18,7 @@ struct FmtAst : Visitor {
   void visitBinop(const Binop &op);
   void visitNumber(const Number &n);
   void visitIdentifier(const Identifier &id);
+  void visitStatementExpr(const StatementExpr &statements);
 
 private:
   std::function<void(const std::string &)> output;

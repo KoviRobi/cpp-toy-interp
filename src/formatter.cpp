@@ -3,7 +3,7 @@
 #include <iostream>
 
 void formatFn(const std::vector<Identifier> &args,
-              const std::vector<std::shared_ptr<Ast>> &body,
+              const std::shared_ptr<Ast> &body,
               std::function<void(const std::string &)> output,
               FmtAst &visitor) {
   output("fn ");
@@ -16,15 +16,9 @@ void formatFn(const std::vector<Identifier> &args,
     arg.accept(visitor);
   }
 
-  output(" { ");
-  first = true;
-  for (auto &body : body) {
-    if (!first)
-      output(" ; ");
-    first = false;
-    body->accept(visitor);
-  }
-  output(" }");
+  output(" ");
+
+  body->accept(visitor);
 }
 
 // AST formatter
@@ -44,9 +38,11 @@ void FmtAst::visitFn(const Fn &fn) {
 };
 
 void FmtAst::visitApp(const App &app) {
+  output("( ");
   app.get_lhs().accept(*this);
-  output(" ");
+  output(" ) ( ");
   app.get_rhs().accept(*this);
+  output(" )");
 };
 
 void FmtAst::visitBinop(const Binop &op) {
@@ -60,6 +56,18 @@ void FmtAst::visitBinop(const Binop &op) {
 void FmtAst::visitNumber(const Number &n) { output(std::to_string(*n)); }
 
 void FmtAst::visitIdentifier(const Identifier &id) { output(*id); };
+
+void FmtAst::visitStatementExpr(const StatementExpr &statements) {
+  output("{ ");
+  bool first = true;
+  for (auto &statement : statements.get_body()) {
+    if (!first)
+      output(" ; ");
+    first = false;
+    statement->accept(*this);
+  }
+  output(" }");
+};
 
 // Value formatter
 

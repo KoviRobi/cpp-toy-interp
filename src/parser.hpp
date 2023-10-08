@@ -12,7 +12,7 @@
  *
  *     vars -> id ("," id)*.
  *
- *     expr -> "fn" vars "{" statements "}".
+ *     expr -> "fn" vars expr.
  *     expr -> app.
  *
  *     app -> infix app?.
@@ -22,6 +22,7 @@
  *     binop -> "<" | "==" | ">" | "+" | "-".
  *
  *     term -> "(" expr ")"
+ *     term -> "{" statements "}"
  *     term -> number
  *     term -> id
  */

@@ -14,13 +14,11 @@ bool Identifier::operator<(const Identifier &other) const {
   return this->name < other.name;
 }
 
-Fn::Fn(std::vector<Identifier> args, std::vector<std::shared_ptr<Ast>> body)
+Fn::Fn(std::vector<Identifier> args, std::shared_ptr<Ast> body)
     : args(std::move(args)), body(std::move(body)) {}
 void Fn::accept(Visitor &v) const { v.visitFn(*this); }
 const std::vector<Identifier> &Fn::get_args(void) const { return args; }
-const std::vector<std::shared_ptr<Ast>> &Fn::get_body(void) const {
-  return body;
-}
+const std::shared_ptr<Ast> &Fn::get_body(void) const { return body; }
 
 App::App(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
     : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
@@ -39,3 +37,10 @@ const Expression &Binop::get_rhs(void) const { return *rhs; }
 Number::Number(uint32_t value) : value(value) {}
 void Number::accept(Visitor &v) const { v.visitNumber(*this); }
 uint32_t Number::operator*() const { return value; }
+
+StatementExpr::StatementExpr(std::vector<std::unique_ptr<Ast>> body)
+    : body(std::move(body)) {}
+void StatementExpr::accept(Visitor &v) const { v.visitStatementExpr(*this); }
+const std::vector<std::unique_ptr<Ast>> &StatementExpr::get_body(void) const {
+  return body;
+}

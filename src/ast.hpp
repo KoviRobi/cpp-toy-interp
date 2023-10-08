@@ -16,6 +16,7 @@ struct Fn;
 struct App;
 struct Binop;
 struct Number;
+struct StatementExpr;
 
 struct Visitor {
   virtual void visitAssignment(const Assignment &) = 0;
@@ -24,6 +25,7 @@ struct Visitor {
   virtual void visitBinop(const Binop &) = 0;
   virtual void visitNumber(const Number &) = 0;
   virtual void visitIdentifier(const Identifier &) = 0;
+  virtual void visitStatementExpr(const StatementExpr &) = 0;
 };
 
 struct Ast {
@@ -56,14 +58,14 @@ private:
 };
 
 struct Fn : Expression {
-  Fn(std::vector<Identifier> args, std::vector<std::shared_ptr<Ast>> body);
+  Fn(std::vector<Identifier> args, std::shared_ptr<Ast> body);
   void accept(Visitor &) const override;
   const std::vector<Identifier> &get_args(void) const;
-  const std::vector<std::shared_ptr<Ast>> &get_body(void) const;
+  const std::shared_ptr<Ast> &get_body(void) const;
 
 private:
   const std::vector<Identifier> args;
-  const std::vector<std::shared_ptr<Ast>> body;
+  const std::shared_ptr<Ast> body;
 };
 
 struct App : Expression {
@@ -98,4 +100,13 @@ struct Number : Expression {
 
 private:
   uint32_t value;
+};
+
+struct StatementExpr : Expression {
+  StatementExpr(std::vector<std::unique_ptr<Ast>> body);
+  void accept(Visitor &) const override;
+  const std::vector<std::unique_ptr<Ast>> &get_body(void) const;
+
+private:
+  const std::vector<std::unique_ptr<Ast>> body;
 };

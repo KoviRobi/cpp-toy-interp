@@ -1,12 +1,16 @@
 #include "eval.hpp"
 
+#include <cassert>
+
 NumberValue::NumberValue(uint32_t value) : value(value) {}
 void NumberValue::accept(ValueVisitor &v) const { v.visitNumber(*this); }
 uint32_t NumberValue::get_value() const { return value; }
 
-ClosureValue::ClosureValue(const std::vector<Identifier> &args,
-                           const std::vector<std::shared_ptr<Ast>> &body)
-    : environment({}), args(args), body(body) {}
+ClosureValue::ClosureValue(
+    const std::vector<Identifier> &args,
+    const std::vector<std::shared_ptr<Ast>> &body,
+    const std::map<Identifier, std::shared_ptr<Value>> environment)
+    : environment(environment), args(args), body(body) {}
 
 void ClosureValue::accept(ValueVisitor &v) const { v.visitClosure(*this); }
 
@@ -18,18 +22,26 @@ const std::vector<std::shared_ptr<Ast>> &ClosureValue::get_body() const {
 
 std::shared_ptr<Value> ClosureValue::apply(std::shared_ptr<Value> arg,
                                            EvalVisitor &eval) const {
+  auto inner_environment(environment);
+  auto formal_begin = args.cbegin();
+  auto formal_end = args.cend();
+  auto formal = *formal_begin;
+  assert(formal_begin != formal_end);
+  inner_environment[formal] = arg;
+
   if (args.size() == 1) {
+    auto outer_environment = eval.get_environment();
+    eval.set_environment(inner_environment);
     for (auto &node : body) {
       node->accept(eval);
     }
-    return eval.get_last();
+    auto result = eval.get_last();
+    eval.set_environment(outer_environment);
+    return result;
   } else {
-    auto formal_begin = args.cbegin();
-    auto formal_end = args.cend();
-    auto formal = *formal_begin;
     ++formal_begin;
     std::vector<Identifier> rest_args(formal_begin, formal_end);
-    return std::make_shared<ClosureValue>(rest_args, body);
+    return std::make_shared<ClosureValue>(rest_args, body, inner_environment);
   }
 }
 
@@ -46,7 +58,8 @@ void EvalVisitor::visitAssignment(const Assignment &let) {
 
 void EvalVisitor::visitFn(const Fn &fn) {
   std::vector<Ast> body;
-  last = std::make_unique<ClosureValue>(fn.get_args(), fn.get_body());
+  last =
+      std::make_shared<ClosureValue>(fn.get_args(), fn.get_body(), environment);
 }
 
 void EvalVisitor::visitApp(const App &app) {
@@ -58,7 +71,7 @@ void EvalVisitor::visitApp(const App &app) {
   app.get_rhs().accept(*this);
   auto rhs = last;
 
-  std::map<Identifier, std::shared_ptr<Value>> outer_environment = environment;
+  last = lhs->apply(rhs, *this);
 }
 
 void EvalVisitor::visitBinop(const Binop &op) {
@@ -103,3 +116,12 @@ void EvalVisitor::visitIdentifier(const Identifier &id) {
 }
 
 std::shared_ptr<Value> EvalVisitor::get_last(void) const { return last; }
+
+std::map<Identifier, std::shared_ptr<Value>>
+EvalVisitor::get_environment(void) {
+  return environment;
+}
+void EvalVisitor::set_environment(
+    std::map<Identifier, std::shared_ptr<Value>> new_environment) {
+  environment = new_environment;
+}

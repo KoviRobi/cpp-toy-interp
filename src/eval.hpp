@@ -58,7 +58,8 @@ private:
 
 struct ClosureValue : Value {
   ClosureValue(const std::vector<Identifier> &args,
-               const std::vector<std::shared_ptr<Ast>> &body);
+               const std::vector<std::shared_ptr<Ast>> &body,
+               const std::map<Identifier, std::shared_ptr<Value>> environment);
   void accept(ValueVisitor &) const override;
   const std::vector<Identifier> &get_args() const;
   const std::vector<std::shared_ptr<Ast>> &get_body() const;
@@ -67,8 +68,8 @@ struct ClosureValue : Value {
 
 private:
   std::map<Identifier, std::shared_ptr<Value>> environment;
-  const std::vector<Identifier> &args;
-  const std::vector<std::shared_ptr<Ast>> &body;
+  const std::vector<Identifier> args;
+  const std::vector<std::shared_ptr<Ast>> body;
 };
 
 struct ValueVisitor {
@@ -87,6 +88,8 @@ struct EvalVisitor : Visitor {
   void visitIdentifier(const Identifier &id);
 
   std::shared_ptr<Value> get_last(void) const;
+  std::map<Identifier, std::shared_ptr<Value>> get_environment(void);
+  void set_environment(std::map<Identifier, std::shared_ptr<Value>>);
 
 private:
   std::map<Identifier, std::shared_ptr<Value>> environment;

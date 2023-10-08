@@ -94,6 +94,7 @@ TEST_CASE("Test evaluating", "[eval]") {
 
   SECTION("Arithmetic") {
     formatted = "";
+    evaluator.set_environment({});
     for (auto &node : parse("1 + 2")) {
       node->accept(evaluator);
     }
@@ -103,10 +104,21 @@ TEST_CASE("Test evaluating", "[eval]") {
 
   SECTION("Variables") {
     formatted = "";
+    evaluator.set_environment({});
     for (auto &node : parse("let x = 4 ; x")) {
       node->accept(evaluator);
     }
     evaluator.get_last()->accept(value_formatter);
     REQUIRE("4" == formatted);
+  }
+
+  SECTION("Functions") {
+    formatted = "";
+    evaluator.set_environment({});
+    for (auto &node : parse("( fn x { x + 1 } ) 1")) {
+      node->accept(evaluator);
+    }
+    evaluator.get_last()->accept(value_formatter);
+    REQUIRE("2" == formatted);
   }
 }
